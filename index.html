@@ -3,149 +3,349 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>NEW Badge / Border Annotator</title>
+  <title>Oh My Badge Annotator - Annotate UI Changes with Badge Frames</title>
+
+  <!-- SEO -->
+  <meta name="description" content="Badge Annotator is a browser-based tool for marking UI changes on screenshots and HTML mockups. Draw highlight frames, label them (NEW, UPDATED, FIXED…), then export an annotated PNG or HTML file." />
+  <meta name="keywords" content="badge annotator, UI annotation, screenshot markup, change highlight, design review, new badge, figma alternative, HTML export" />
+  <meta name="author" content="Hagar Usama" />
+  <meta name="robots" content="index, follow" />
+
+  <!-- Open Graph (social sharing) -->
+  <meta property="og:type"        content="website" />
+  <meta property="og:title"       content="Badge Annotator — Annotate UI Changes with Badge Frames" />
+  <meta property="og:description" content="Draw highlight frames over any HTML or image, label them, and export an annotated PNG or HTML — all in the browser, no install needed." />
+  <meta property="og:site_name"   content="Badge Annotator" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary" />
+  <meta name="twitter:title"       content="Badge Annotator" />
+  <meta name="twitter:description" content="Browser-based tool to annotate UI screenshots and HTML mockups with NEW / UPDATED / FIXED badge frames." />
+
+  <!-- Favicon (inline SVG — no asset file needed) -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏷️</text></svg>" />
   <style>
+    /* == Tokens ======================================== */
     :root {
-      --accent: #ff9800;
-      --accent-soft: #fff8e1;
-      --bg: #f5f6f8;
-      --panel: #ffffff;
-      --text: #172033;
-      --muted: #677083;
-      --border: #d8dde8;
-      --danger: #d32f2f;
+      --bg:            oklch(0.965 0 0);
+      --surface:       oklch(1 0 0);
+      --surface-2:     oklch(0.985 0.004 255);
+      --hdr-bg:        oklch(0.155 0.018 252);
+      --hdr-text:      oklch(0.92 0.008 252);
+      --hdr-muted:     oklch(0.62 0.010 252);
+
+      --ink-1:         oklch(0.17 0.014 252);
+      --ink-2:         oklch(0.36 0.012 252);
+      --ink-3:         oklch(0.48 0.008 252);
+
+      --border:        oklch(0.90 0.006 255);
+      --border-2:      oklch(0.83 0.009 255);
+
+      --accent:        oklch(0.725 0.185 55);
+      --accent-h:      oklch(0.665 0.195 55);
+      --accent-a:      oklch(0.615 0.205 55);
+      --accent-dim:    oklch(0.95  0.055 70);
+      --accent-ring:   oklch(0.725 0.185 55 / 0.18);
+
+      --danger:        oklch(0.47 0.19 22);
+      --danger-h:      oklch(0.42 0.20 22);
+      --danger-soft:   oklch(0.975 0.025 22);
+      --danger-ring:   oklch(0.47 0.19 22 / 0.18);
+
+      --success:       oklch(0.52 0.16 150);
+
+      --shadow-xs:     0 1px 2px oklch(0 0 0 / 0.05);
+      --shadow-sm:     0 1px 5px oklch(0 0 0 / 0.07);
+      --shadow-md:     0 3px 12px oklch(0 0 0 / 0.09);
+      --shadow-lg:     0 6px 28px oklch(0 0 0 / 0.12);
+
+      --r-sm:  5px;
+      --r-md:  8px;
+      --r-lg:  12px;
+
+      --font:  ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      --tx-xs: 0.6875rem;   /* 11px */
+      --tx-sm: 0.8125rem;   /* 13px */
+      --tx-md: 0.875rem;    /* 14px */
+
+      --t-fast:   120ms;
+      --t-base:   200ms;
+      --t-slow:   300ms;
+      --ease-out: cubic-bezier(0.25, 1, 0.5, 1);
+
+      --z-overlay:  10;
+      --z-hdl:      30;
+      --z-lbl:      31;
+      --z-badge-ui: 100;
+      --z-toast:    300;
     }
 
-    * { box-sizing: border-box; }
-
+    /* == Reset ========================================= */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { height: 100%; }
     body {
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      color: var(--text);
+      min-height: 100%;
+      font-family: var(--font);
+      font-size: var(--tx-sm);
+      line-height: 1.5;
+      color: var(--ink-1);
       background: var(--bg);
+      -webkit-font-smoothing: antialiased;
     }
 
-    header {
-      padding: 14px 18px;
-      background: #111827;
-      color: white;
+    /* == App shell ===================================== */
+    .app {
+      display: grid;
+      grid-template-rows: 48px 48px 1fr;
+      height: 100dvh;
+      height: 100vh; /* fallback */
+      overflow: hidden;
+    }
+
+    /* == Header ======================================== */
+    .app-header {
       display: flex;
       align-items: center;
-      justify-content: space-between;
       gap: 12px;
-      flex-wrap: wrap;
+      padding: 0 20px;
+      background: var(--hdr-bg);
+      border-bottom: 1px solid oklch(1 0 0 / 0.06);
+    }
+    .hdr-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .hdr-icon {
+      width: 18px;
+      height: 18px;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+    .hdr-title {
+      font-size: var(--tx-md);
+      font-weight: 600;
+      color: var(--hdr-text);
+      letter-spacing: -0.01em;
+    }
+    .hdr-hint {
+      font-size: var(--tx-xs);
+      color: var(--hdr-muted);
     }
 
-    header h1 {
-      margin: 0;
-      font-size: 18px;
-      font-weight: 700;
-    }
-
-    header .hint {
-      color: #c9d2e3;
-      font-size: 13px;
-    }
-
+    /* == Toolbar ======================================= */
     .toolbar {
       display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      padding: 12px 18px;
-      background: var(--panel);
-      border-bottom: 1px solid var(--border);
       align-items: center;
+      height: 48px;
+      padding: 0 16px;
+      gap: 0;
+      background: var(--surface-2);
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-width: none;
     }
+    .toolbar::-webkit-scrollbar { display: none; }
 
-    button, label.file-label {
-      appearance: none;
-      border: 1px solid var(--border);
-      background: white;
-      color: var(--text);
-      border-radius: 8px;
-      padding: 9px 12px;
-      font-size: 13px;
-      cursor: pointer;
-      transition: 0.15s ease;
+    .tool-group {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      flex-shrink: 0;
+    }
+    .tool-sep {
+      width: 1px;
+      height: 18px;
+      background: var(--border);
+      margin: 0 8px;
+      flex-shrink: 0;
+    }
+    .tool-spacer { flex: 1; min-width: 8px; }
+
+    /* == Button system ================================= */
+    .btn {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      justify-content: center;
+      gap: 5px;
+      height: 30px;
+      padding: 0 10px;
+      font-family: var(--font);
+      font-size: var(--tx-xs);
+      font-weight: 500;
+      color: var(--ink-2);
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: var(--r-sm);
+      cursor: pointer;
+      white-space: nowrap;
       user-select: none;
+      text-decoration: none;
+      outline: none;
+      transition:
+        color        var(--t-fast) var(--ease-out),
+        background   var(--t-fast) var(--ease-out),
+        border-color var(--t-fast) var(--ease-out),
+        box-shadow   var(--t-fast) var(--ease-out);
+    }
+    .btn:hover {
+      color: var(--ink-1);
+      background: var(--surface);
+      border-color: var(--border);
+      box-shadow: var(--shadow-xs);
+    }
+    .btn:active { background: var(--bg); }
+    .btn:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
     }
 
-    button:hover, label.file-label:hover {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.12);
-    }
-
-    button.primary {
+    /* Primary */
+    .btn-primary {
       background: var(--accent);
-      color: white;
+      color: #fff;
       border-color: var(--accent);
-      font-weight: 700;
+      font-weight: 600;
+    }
+    .btn-primary:hover {
+      background: var(--accent-h);
+      border-color: var(--accent-h);
+      color: #fff;
+      box-shadow: 0 2px 8px var(--accent-ring);
+    }
+    .btn-primary:active {
+      background: var(--accent-a);
+      border-color: var(--accent-a);
+    }
+    /* Draw mode toggled state */
+    .btn-primary[aria-pressed="true"] {
+      background: var(--ink-1);
+      border-color: var(--ink-1);
+      color: #fff;
+    }
+    .btn-primary[aria-pressed="true"]:hover {
+      background: oklch(0.27 0.014 252);
+      border-color: oklch(0.27 0.014 252);
+      box-shadow: none;
     }
 
-    button.danger {
-      color: var(--danger);
-      border-color: rgba(211, 47, 47, 0.35);
+    /* Danger */
+    .btn-danger { color: var(--danger); }
+    .btn-danger:hover {
+      background: var(--danger-soft);
+      border-color: oklch(0.47 0.19 22 / 0.28);
+      color: var(--danger-h);
+      box-shadow: none;
     }
 
-    input[type="file"] { display: none; }
+    /* Full-width */
+    .btn-full { width: 100%; }
 
-    .options {
+    /* File label */
+    label.btn { appearance: none; }
+    label.btn input[type="file"] { display: none; }
+
+    /* == Canvas size inputs ============================ */
+    .size-row {
       display: flex;
-      gap: 10px;
       align-items: center;
-      flex-wrap: wrap;
-      margin-left: auto;
-      font-size: 13px;
-      color: var(--muted);
+      gap: 6px;
     }
-
-    .options input {
-      width: 68px;
-      padding: 7px;
-      border-radius: 6px;
+    .size-lbl {
+      font-size: var(--tx-xs);
+      font-weight: 600;
+      color: var(--ink-3);
+    }
+    .size-input {
+      width: 54px;
+      height: 28px;
+      padding: 0 7px;
+      font-family: var(--font);
+      font-size: var(--tx-xs);
+      font-variant-numeric: tabular-nums;
+      color: var(--ink-1);
+      background: var(--surface);
       border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      outline: none;
+      transition: border-color var(--t-fast), box-shadow var(--t-fast);
+    }
+    .size-input:hover { border-color: var(--border-2); }
+    .size-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent-ring);
     }
 
-    main {
+    /* == Main area ===================================== */
+    .app-main {
       display: grid;
-      grid-template-columns: 1fr 280px;
-      gap: 14px;
-      padding: 14px;
-      height: calc(100vh - 111px);
-      min-height: 560px;
+      grid-template-columns: 1fr 252px;
+      gap: 12px;
+      padding: 12px;
+      min-height: 0;
+      overflow: hidden;
     }
 
-    .stage-wrap {
+    /* == Canvas wrap =================================== */
+    .canvas-wrap {
       min-width: 0;
+      display: flex;
+      flex-direction: column;
       border: 1px solid var(--border);
-      border-radius: 12px;
-      background: white;
-      overflow: auto;
-      position: relative;
+      border-radius: var(--r-lg);
+      background: var(--surface);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
     }
 
-    .stage-info {
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      background: rgba(255, 255, 255, 0.95);
+    .canvas-bar {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      height: 34px;
+      padding: 0 12px;
+      background: var(--surface);
       border-bottom: 1px solid var(--border);
-      padding: 9px 12px;
-      font-size: 13px;
-      color: var(--muted);
+    }
+    .canvas-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--border-2);
+      flex-shrink: 0;
+      transition: background var(--t-base) var(--ease-out), box-shadow var(--t-base) var(--ease-out);
+    }
+    .canvas-dot.is-draw {
+      background: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-ring);
+    }
+    #status {
+      flex: 1;
+      font-size: var(--tx-xs);
+      color: var(--ink-3);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
+    .canvas-scroll {
+      flex: 1;
+      overflow: auto;
+      min-height: 0;
+    }
+
+    /* == Stage ========================================= */
     #stage {
       position: relative;
       display: inline-block;
       width: 900px;
       height: 560px;
       margin: 16px;
-      background: #ffffff;
-      border: 1px dashed #b8c0cf;
+      background: var(--surface);
+      border: 1.5px dashed var(--border-2);
+      border-radius: 2px;
       overflow: visible;
       transform-origin: top left;
     }
@@ -156,8 +356,8 @@
       z-index: 1;
       background: white;
       overflow: hidden;
+      border-radius: 2px;
     }
-
     #contentLayer img.loaded-image {
       display: block;
       width: 100%;
@@ -166,7 +366,6 @@
       user-select: none;
       pointer-events: none;
     }
-
     #contentLayer iframe {
       width: 100%;
       height: 100%;
@@ -176,1100 +375,1511 @@
       pointer-events: none;
     }
 
+    /* == Placeholder =================================== */
     .placeholder {
       width: 100%;
       height: 100%;
-      display: grid;
-      place-items: center;
-      color: var(--muted);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
       text-align: center;
       padding: 40px;
-      background:
-        linear-gradient(45deg, #f9fafb 25%, transparent 25%),
-        linear-gradient(-45deg, #f9fafb 25%, transparent 25%),
-        linear-gradient(45deg, transparent 75%, #f9fafb 75%),
-        linear-gradient(-45deg, transparent 75%, #f9fafb 75%);
-      background-size: 28px 28px;
-      background-position: 0 0, 0 14px, 14px -14px, -14px 0;
+      background-color: oklch(0.985 0 0);
+      background-image:
+        linear-gradient(45deg, var(--bg) 25%, transparent 25%),
+        linear-gradient(-45deg, var(--bg) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, var(--bg) 75%),
+        linear-gradient(-45deg, transparent 75%, var(--bg) 75%);
+      background-size: 24px 24px;
+      background-position: 0 0, 0 12px, 12px -12px, -12px 0;
+    }
+    .ph-icon {
+      width: 36px;
+      height: 36px;
+      color: var(--border-2);
+    }
+    .placeholder strong {
+      display: block;
+      font-size: var(--tx-md);
+      font-weight: 600;
+      color: var(--ink-2);
+      margin-bottom: 4px;
+    }
+    .placeholder p {
+      font-size: var(--tx-xs);
+      color: var(--ink-3);
+      max-width: 220px;
+      line-height: 1.55;
     }
 
+    /* == Overlay ======================================= */
     #overlayLayer {
       position: absolute;
       inset: 0;
-      z-index: 10;
+      z-index: var(--z-overlay);
       pointer-events: auto;
     }
 
-    /* New / changed area highlight */
+    /* == Badge highlight =============================== */
     .new-change-highlight {
-      border: 2px solid #ff9800 !important;
-      background: rgba(255, 248, 225, 0.55) !important;
-      border-radius: 4px;
+      border: 2px solid var(--b-color, var(--accent)) !important;
+      background: var(--b-fill, oklch(0.725 0.185 55 / 0.07)) !important;
+      border-radius: var(--r-sm);
       position: absolute;
       overflow: visible !important;
-      animation: changePulse 2s ease-in-out infinite;
+      animation: badgePulse 2.5s var(--ease-out) infinite;
       cursor: move;
     }
-
-    /* NEW badge */
     .new-change-highlight::before {
-      content: "NEW";
+      content: attr(data-label);
       position: absolute;
-      top: -12px;
-      right: -8px;
-      background: #ff9800;
+      top: -11px;
+      right: -6px;
+      background: var(--b-color, var(--accent));
       color: #fff;
+      font-family: var(--font);
       font-size: 9px;
-      font-weight: bold;
+      font-weight: 700;
+      letter-spacing: 0.05em;
       line-height: 1;
       padding: 3px 5px;
-      border-radius: 8px;
-      z-index: 9999;
+      border-radius: 4px;
+      z-index: var(--z-badge-ui);
       pointer-events: none;
       white-space: nowrap;
     }
-
-    @keyframes changePulse {
-      0% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.45); }
-      70% { box-shadow: 0 0 0 8px rgba(255, 152, 0, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0); }
+    .new-change-highlight[data-size="s"]::before { font-size: 8px;  padding: 2px 4px;  top: -9px; }
+    .new-change-highlight[data-size="m"]::before { font-size: 9px;  padding: 3px 5px;  top: -11px; }
+    .new-change-highlight[data-size="l"]::before { font-size: 11px; padding: 5px 8px;  top: -15px; }
+    @keyframes badgePulse {
+      0%   { box-shadow: 0 0 0 0   var(--b-glow, rgba(255,152,0,0.45)); }
+      70%  { box-shadow: 0 0 0 8px transparent; }
+      100% { box-shadow: 0 0 0 0   transparent; }
     }
-
     .new-change-highlight.selected {
-      outline: 2px dashed #111827;
+      outline: 2px dashed var(--ink-1);
       outline-offset: 3px;
     }
-
     .resize-handle {
       position: absolute;
-      right: -6px;
-      bottom: -6px;
-      width: 12px;
-      height: 12px;
+      right: -5px;
+      bottom: -5px;
+      width: 10px;
+      height: 10px;
       border-radius: 50%;
-      background: #111827;
+      background: var(--ink-1);
       border: 2px solid white;
       cursor: nwse-resize;
-      z-index: 10000;
+      z-index: var(--z-badge-ui);
+      box-shadow: var(--shadow-xs);
     }
 
+    /* Drawing preview rect */
     .drawing-box {
       position: absolute;
-      border: 2px dashed var(--accent);
-      background: rgba(255, 152, 0, 0.12);
+      border: 1.5px dashed var(--accent);
+      background: oklch(0.725 0.185 55 / 0.09);
+      border-radius: var(--r-sm);
       z-index: 100;
       pointer-events: none;
     }
 
-    .canvas-resize-handle {
+    /* == Canvas resize handles ========================= */
+    .c-resize {
       position: absolute;
-      z-index: 30;
-      background: #111827;
+      z-index: var(--z-hdl);
+      background: var(--ink-1);
       border: 2px solid white;
-      box-shadow: 0 1px 5px rgba(0,0,0,0.28);
+      box-shadow: var(--shadow-sm);
+      transition: background var(--t-fast) var(--ease-out);
     }
+    .c-resize:hover { background: var(--accent); }
 
-    .canvas-resize-handle.corner {
-      right: -10px;
-      bottom: -10px;
-      width: 18px;
-      height: 18px;
-      border-radius: 4px;
+    .c-resize.corner {
+      right: -9px; bottom: -9px;
+      width: 16px; height: 16px;
+      border-radius: var(--r-sm);
       cursor: nwse-resize;
     }
-
-    .canvas-resize-handle.right {
-      right: -8px;
-      top: 50%;
-      width: 14px;
-      height: 44px;
+    .c-resize.right {
+      right: -7px; top: 50%;
+      width: 12px; height: 40px;
       transform: translateY(-50%);
       border-radius: 999px;
       cursor: ew-resize;
     }
-
-    .canvas-resize-handle.bottom {
-      left: 50%;
-      bottom: -8px;
-      width: 44px;
-      height: 14px;
+    .c-resize.bottom {
+      left: 50%; bottom: -7px;
+      width: 40px; height: 12px;
       transform: translateX(-50%);
       border-radius: 999px;
       cursor: ns-resize;
     }
 
-    .canvas-size-label {
+    .canvas-size-lbl {
       position: absolute;
-      right: 12px;
-      bottom: 12px;
-      z-index: 31;
-      background: rgba(17, 24, 39, 0.78);
-      color: white;
-      font-size: 12px;
-      padding: 5px 7px;
-      border-radius: 6px;
+      right: 10px; bottom: 10px;
+      z-index: var(--z-lbl);
+      background: oklch(0.155 0.018 252 / 0.72);
+      color: oklch(0.92 0.008 252);
+      font-family: var(--font);
+      font-size: 11px;
+      font-variant-numeric: tabular-nums;
+      padding: 3px 7px;
+      border-radius: var(--r-sm);
       pointer-events: none;
+      backdrop-filter: blur(6px);
     }
 
-    aside {
+    /* == Sidebar ======================================= */
+    .app-sidebar {
+      display: flex;
+      flex-direction: column;
       border: 1px solid var(--border);
-      background: var(--panel);
-      border-radius: 12px;
+      border-radius: var(--r-lg);
+      background: var(--surface);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .panel {
       padding: 12px;
-      overflow: auto;
+      flex-shrink: 0;
+    }
+    .panel + .panel { border-top: 1px solid var(--border); }
+    .panel-grow {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
     }
 
-    aside h2 {
-      margin: 0 0 10px;
-      font-size: 16px;
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .panel-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--ink-2);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      background: var(--border);
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--ink-2);
+      letter-spacing: 0;
+      text-transform: none;
+      transition: background var(--t-fast), color var(--t-fast);
+    }
+    .badge-pill.has-items {
+      background: var(--accent-dim);
+      color: var(--ink-1);
     }
 
-    .field { margin-bottom: 10px; }
-
-    .field label {
-      display: block;
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 4px;
+    /* == Badge list ==================================== */
+    .badge-scroll {
+      flex: 1;
+      overflow-y: auto;
+      min-height: 0;
+    }
+    .badge-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      border-radius: var(--r-sm);
+      font-size: var(--tx-xs);
+      color: var(--ink-2);
+      cursor: pointer;
+      transition: background var(--t-fast);
+      font-variant-numeric: tabular-nums;
+    }
+    .badge-item:hover { background: var(--bg); }
+    .badge-item.active {
+      background: var(--accent-dim);
+      color: var(--ink-1);
+    }
+    .badge-num {
+      width: 18px;
+      height: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      background: var(--border);
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--ink-2);
+      flex-shrink: 0;
+      transition: background var(--t-fast), color var(--t-fast);
+    }
+    .badge-item.active .badge-num {
+      background: var(--accent);
+      color: #fff;
     }
 
-    .field input, .field select {
-      width: 100%;
-      padding: 8px;
-      border-radius: 7px;
-      border: 1px solid var(--border);
+    /* == Empty states ================================== */
+    .empty-msg {
+      font-size: var(--tx-xs);
+      color: var(--ink-3);
+      line-height: 1.5;
+      padding: 4px 0;
+    }
+    .empty-msg.center {
+      text-align: center;
+      padding: 12px 8px;
     }
 
-    .grid-2 {
+    /* == Property editor =============================== */
+    .prop-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 8px;
+      margin-bottom: 10px;
     }
-
-    .badge-list {
-      margin-top: 12px;
-      border-top: 1px solid var(--border);
-      padding-top: 10px;
+    .prop-field { display: flex; flex-direction: column; gap: 4px; }
+    .prop-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--ink-3);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
     }
-
-    .badge-item {
+    .prop-input {
+      width: 100%;
+      height: 30px;
+      padding: 0 8px;
+      font-family: var(--font);
+      font-size: var(--tx-xs);
+      font-variant-numeric: tabular-nums;
+      color: var(--ink-1);
+      background: var(--bg);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 8px;
-      margin-bottom: 8px;
-      font-size: 13px;
-      cursor: pointer;
-      background: #fff;
+      border-radius: var(--r-sm);
+      outline: none;
+      transition: border-color var(--t-fast), box-shadow var(--t-fast);
     }
-
-    .badge-item.active {
+    .prop-input:hover { border-color: var(--border-2); }
+    .prop-input:focus {
       border-color: var(--accent);
-      background: var(--accent-soft);
+      box-shadow: 0 0 0 2px var(--accent-ring);
+      background: var(--surface);
     }
 
-    .empty, .small-note {
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.4;
+    /* == Panel note ==================================== */
+    .panel-note {
+      flex-shrink: 0;
+      padding: 10px 12px;
+      font-size: 11px;
+      color: var(--ink-3);
+      line-height: 1.55;
+      border-top: 1px solid var(--border);
     }
 
-    .small-note {
-      margin-top: 8px;
+    /* == Toast ========================================= */
+    .toasts {
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: var(--z-toast);
+      pointer-events: none;
+    }
+    .toast {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: var(--r-md);
+      font-family: var(--font);
+      font-size: var(--tx-xs);
+      font-weight: 500;
+      max-width: 300px;
+      box-shadow: var(--shadow-lg);
+      opacity: 0;
+      transform: translateY(6px) scale(0.98);
+      transition:
+        opacity     var(--t-base) var(--ease-out),
+        transform   var(--t-base) var(--ease-out);
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    .toast-info    { background: var(--hdr-bg);  color: var(--hdr-text); }
+    .toast-success { background: var(--success);  color: #fff; }
+    .toast-error   { background: var(--danger);   color: #fff; }
+
+    /* == Editor: color + slider + size toggle ========== */
+    .prop-color-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .prop-color {
+      width: 100%;
+      height: 30px;
+      padding: 2px 3px;
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      background: var(--bg);
+      cursor: pointer;
+      outline: none;
+      transition: border-color var(--t-fast), box-shadow var(--t-fast);
+    }
+    .prop-color:hover { border-color: var(--border-2); }
+    .prop-color:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-ring); }
+
+    .prop-alpha-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+    .prop-alpha-val {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--ink-2);
+      font-variant-numeric: tabular-nums;
+    }
+    .prop-slider {
+      width: 100%;
+      height: 4px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: var(--border);
+      border-radius: 999px;
+      outline: none;
+      cursor: pointer;
+      margin-top: 2px;
+    }
+    .prop-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 2px solid white;
+      box-shadow: var(--shadow-xs);
+      cursor: pointer;
+    }
+    .prop-slider::-moz-range-thumb {
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 2px solid white;
+      box-shadow: var(--shadow-xs);
+      cursor: pointer;
+    }
+    .prop-slider:focus { outline: none; }
+
+    .size-btns {
+      display: flex;
+      gap: 4px;
+    }
+    .size-btn {
+      flex: 1;
+      height: 28px;
+      font-family: var(--font);
+      font-size: var(--tx-xs);
+      font-weight: 600;
+      color: var(--ink-2);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      cursor: pointer;
+      transition: color var(--t-fast), background var(--t-fast), border-color var(--t-fast);
+      outline: none;
+    }
+    .size-btn:hover { border-color: var(--border-2); color: var(--ink-1); }
+    .size-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    .size-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .prop-section-sep {
+      height: 1px;
+      background: var(--border);
+      margin: 10px 0;
     }
 
-    @media (max-width: 900px) {
-      main {
+    /* == Responsive ==================================== */
+    @media (max-width: 860px) {
+      .app {
+        grid-template-rows: 48px auto 1fr;
+        height: auto;
+        min-height: 100dvh;
+        min-height: 100vh;
+        overflow: auto;
+      }
+      .app-main {
         grid-template-columns: 1fr;
         height: auto;
+        overflow: visible;
       }
-      .options { margin-left: 0; }
+      .app-sidebar { height: 380px; }
+      .tool-spacer { display: none; }
+    }
+    @media (max-width: 560px) {
+      .hdr-hint { display: none; }
+    }
+
+    /* == Reduced motion ================================ */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* == Modal ========================================= */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: oklch(0 0 0 / 0.32);
+      backdrop-filter: blur(2px);
+      z-index: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity var(--t-base) var(--ease-out);
+    }
+    .modal-backdrop.show { opacity: 1; }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      box-shadow: var(--shadow-lg);
+      padding: 20px 20px 16px;
+      width: 320px;
+      max-width: calc(100vw - 32px);
+      transform: translateY(6px) scale(0.98);
+      transition:
+        transform var(--t-base) var(--ease-out),
+        opacity   var(--t-base) var(--ease-out);
+      opacity: 0;
+    }
+    .modal-backdrop.show .modal {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .modal-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: var(--r-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .modal-icon.danger { background: var(--danger-soft); color: var(--danger); }
+    .modal-icon.info   { background: var(--accent-dim);  color: var(--accent); }
+    .modal-icon svg    { width: 15px; height: 15px; }
+
+    .modal-title {
+      font-size: var(--tx-md);
+      font-weight: 700;
+      color: var(--ink-1);
+      letter-spacing: -0.01em;
+    }
+    .modal-body {
+      font-size: var(--tx-sm);
+      color: var(--ink-2);
+      line-height: 1.55;
+      margin-bottom: 16px;
+      padding-left: 40px;
+    }
+    .modal-actions {
+      display: flex;
+      gap: 6px;
+      justify-content: flex-end;
+    }
+    .modal-actions .btn-danger-solid {
+      background: var(--danger);
+      color: #fff;
+      border-color: var(--danger);
+      font-weight: 600;
+    }
+    .modal-actions .btn-danger-solid:hover {
+      background: var(--danger-h);
+      border-color: var(--danger-h);
+      box-shadow: 0 2px 8px var(--danger-ring);
+      color: #fff;
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>NEW Badge / Border Annotator</h1>
-    <div class="hint">Load HTML or image → drag frames/canvas → save/export.</div>
+<div class="app">
+
+  <!-- Header -->
+  <header class="app-header">
+    <div class="hdr-brand">
+      <svg class="hdr-icon" viewBox="0 0 18 18" fill="none" stroke="currentColor"
+           stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="2" y="2" width="14" height="14" rx="2.5"/>
+        <rect x="5" y="5" width="4" height="4" rx="1"/>
+        <line x1="12" y1="6.5" x2="15" y2="6.5"/>
+        <line x1="12" y1="9" x2="14" y2="9"/>
+        <line x1="5" y1="12" x2="13" y2="12"/>
+      </svg>
+      <span class="hdr-title">Badge Annotator</span>
+    </div>
+    <span class="hdr-hint">Load material · draw frames · export</span>
   </header>
 
-  <section class="toolbar">
-    <label class="file-label">
-      Load HTML
-      <input id="htmlInput" type="file" accept=".html,.htm,text/html" />
-    </label>
+  <!-- Toolbar -->
+  <div class="toolbar" role="toolbar" aria-label="Tools">
 
-    <label class="file-label">
-      Load Image
-      <input id="imageInput" type="file" accept="image/*" />
-    </label>
-
-    <button id="addModeBtn" class="primary" type="button">Draw New Badge Frame</button>
-    <button id="clearBtn" class="danger" type="button">Clear Badges</button>
-    <button id="saveProjectBtn" type="button">Save Project JSON</button>
-    <label class="file-label">
-      Load Project JSON
-      <input id="projectInput" type="file" accept=".json,application/json" />
-    </label>
-    <button id="exportHtmlBtn" type="button">Export HTML</button>
-    <button id="exportImageBtn" type="button">Export Image PNG</button>
-
-    <div class="options">
-      <label>Canvas W <input id="canvasW" type="number" min="200" value="900" /></label>
-      <label>Canvas H <input id="canvasH" type="number" min="200" value="560" /></label>
-      <button id="resizeCanvasBtn" type="button">Apply Size</button>
+    <div class="tool-group">
+      <label class="btn">Load HTML<input id="htmlInput" type="file" accept=".html,.htm,text/html" /></label>
+      <label class="btn">Load Image<input id="imageInput" type="file" accept="image/*" /></label>
     </div>
-  </section>
 
-  <main>
-    <div class="stage-wrap">
-      <div class="stage-info" id="status">
-        Tip: drag the black canvas handles on the right/bottom/corner to resize the canvas.
+    <div class="tool-sep"></div>
+
+    <div class="tool-group">
+      <button id="addModeBtn" class="btn btn-primary" type="button" aria-pressed="false">Draw Frame</button>
+    </div>
+
+    <div class="tool-sep"></div>
+
+    <div class="tool-group">
+      <button id="saveProjectBtn" class="btn" type="button">Save Project</button>
+      <label class="btn">Load Project<input id="projectInput" type="file" accept=".json,application/json" /></label>
+    </div>
+
+    <div class="tool-sep"></div>
+
+    <div class="tool-group">
+      <button id="exportHtmlBtn" class="btn" type="button">Export HTML</button>
+      <button id="exportImageBtn" class="btn" type="button">Export PNG</button>
+    </div>
+
+    <div class="tool-spacer"></div>
+
+    <div class="tool-group">
+      <div class="size-row">
+        <label class="size-lbl" for="canvasW">W</label>
+        <input id="canvasW" class="size-input" type="number" min="200" value="900" aria-label="Canvas width" />
+        <label class="size-lbl" for="canvasH">H</label>
+        <input id="canvasH" class="size-input" type="number" min="200" value="560" aria-label="Canvas height" />
+        <button id="resizeCanvasBtn" class="btn" type="button">Apply</button>
       </div>
-      <div id="stage">
-        <div id="contentLayer">
-          <div class="placeholder">
-            <div>
-              <strong>No material loaded yet.</strong><br />
-              Load an HTML file or image, draw multiple NEW badge borders, then export.
+    </div>
+
+    <div class="tool-sep"></div>
+
+    <div class="tool-group">
+      <button id="clearBtn" class="btn btn-danger" type="button">Clear All</button>
+    </div>
+
+  </div>
+
+  <!-- Main -->
+  <main class="app-main">
+
+    <!-- Canvas -->
+    <div class="canvas-wrap">
+      <div class="canvas-bar">
+        <div class="canvas-dot" id="statusDot"></div>
+        <div id="status" role="status" aria-live="polite">
+          Drag the edge handles to resize the canvas.
+        </div>
+      </div>
+      <div class="canvas-scroll">
+        <div id="stage">
+          <div id="contentLayer">
+            <div class="placeholder">
+              <svg class="ph-icon" viewBox="0 0 36 36" fill="none" stroke="currentColor"
+                   stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="4" y="7" width="28" height="22" rx="2.5"/>
+                <rect x="8" y="11" width="7" height="7" rx="1.5"/>
+                <line x1="19" y1="13" x2="29" y2="13"/>
+                <line x1="19" y1="16.5" x2="26" y2="16.5"/>
+                <line x1="8" y1="22" x2="29" y2="22"/>
+                <line x1="8" y1="25.5" x2="22" y2="25.5"/>
+              </svg>
+              <div>
+                <strong>No material loaded</strong>
+                <p>Load an HTML file or image above, then draw badge frames over the areas you want to mark.</p>
+              </div>
             </div>
           </div>
+          <div id="overlayLayer"></div>
+          <div class="c-resize right" data-canvas-resize="right" title="Drag to resize width"></div>
+          <div class="c-resize bottom" data-canvas-resize="bottom" title="Drag to resize height"></div>
+          <div class="c-resize corner" data-canvas-resize="corner" title="Drag to resize"></div>
+          <div class="canvas-size-lbl" id="canvasSizeLabel">900 &times; 560</div>
         </div>
-        <div id="overlayLayer"></div>
-        <div class="canvas-resize-handle right" data-canvas-resize="right" title="Drag to resize canvas width"></div>
-        <div class="canvas-resize-handle bottom" data-canvas-resize="bottom" title="Drag to resize canvas height"></div>
-        <div class="canvas-resize-handle corner" data-canvas-resize="corner" title="Drag to resize canvas"></div>
-        <div class="canvas-size-label" id="canvasSizeLabel">900 × 560</div>
       </div>
     </div>
 
-    <aside>
-      <h2>Selected Badge</h2>
-      <div id="editor">
-        <p class="empty">Select a badge frame to edit its position and size.</p>
-      </div>
+    <!-- Sidebar -->
+    <aside class="app-sidebar" aria-label="Badge controls">
 
-      <div class="badge-list">
-        <h2>All Badges</h2>
-        <div id="badgeList" class="empty">No badges yet.</div>
-      </div>
+      <section class="panel" aria-label="Selected badge">
+        <div class="panel-head">
+          <h2 class="panel-title">Selected Badge</h2>
+        </div>
+        <div id="editor">
+          <p class="empty-msg">Select a badge to edit its position and size.</p>
+        </div>
+      </section>
 
-      <p class="small-note">
-        Image export works perfectly for images. For loaded HTML, browsers block reliable screenshot export without external libraries/server rendering, so the app exports a clean HTML file and tries a basic PNG fallback.
-      </p>
+      <section class="panel panel-grow" aria-label="All badges">
+        <div class="panel-head">
+          <h2 class="panel-title">Badges</h2>
+          <span class="badge-pill" id="badgePill" aria-label="0 badges">0</span>
+        </div>
+        <div class="badge-scroll">
+          <div id="badgeList">
+            <p class="empty-msg center">Draw a frame on the canvas to add a badge.</p>
+          </div>
+        </div>
+      </section>
+
+      
+
     </aside>
   </main>
+</div>
 
-  <script>
-    const stage = document.getElementById('stage');
-    const contentLayer = document.getElementById('contentLayer');
-    const overlayLayer = document.getElementById('overlayLayer');
-    const statusEl = document.getElementById('status');
-    const canvasSizeLabel = document.getElementById('canvasSizeLabel');
-    const addModeBtn = document.getElementById('addModeBtn');
-    const clearBtn = document.getElementById('clearBtn');
-    const exportHtmlBtn = document.getElementById('exportHtmlBtn');
-    const exportImageBtn = document.getElementById('exportImageBtn');
-    const saveProjectBtn = document.getElementById('saveProjectBtn');
-    const htmlInput = document.getElementById('htmlInput');
-    const imageInput = document.getElementById('imageInput');
-    const projectInput = document.getElementById('projectInput');
-    const editor = document.getElementById('editor');
-    const badgeList = document.getElementById('badgeList');
-    const canvasW = document.getElementById('canvasW');
-    const canvasH = document.getElementById('canvasH');
-    const resizeCanvasBtn = document.getElementById('resizeCanvasBtn');
+<!-- Toasts -->
+<div class="toasts" id="toastRoot" aria-live="assertive" aria-atomic="true"></div>
 
-    let badges = [];
-    let selectedId = null;
-    let drawMode = false;
-    let drawing = null;
-    let dragState = null;
-    let canvasResizeState = null;
-    let material = {
-      type: 'empty',
-      html: '',
-      imageDataUrl: '',
-      imageName: ''
-    };
+<script>
+  /* == DOM refs ====================================== */
+  const stage           = document.getElementById('stage');
+  const contentLayer    = document.getElementById('contentLayer');
+  const overlayLayer    = document.getElementById('overlayLayer');
+  const statusEl        = document.getElementById('status');
+  const statusDot       = document.getElementById('statusDot');
+  const canvasSizeLabel = document.getElementById('canvasSizeLabel');
+  const addModeBtn      = document.getElementById('addModeBtn');
+  const clearBtn        = document.getElementById('clearBtn');
+  const exportHtmlBtn   = document.getElementById('exportHtmlBtn');
+  const exportImageBtn  = document.getElementById('exportImageBtn');
+  const saveProjectBtn  = document.getElementById('saveProjectBtn');
+  const htmlInput       = document.getElementById('htmlInput');
+  const imageInput      = document.getElementById('imageInput');
+  const projectInput    = document.getElementById('projectInput');
+  const editor          = document.getElementById('editor');
+  const badgeList       = document.getElementById('badgeList');
+  const badgePill       = document.getElementById('badgePill');
+  const canvasW         = document.getElementById('canvasW');
+  const canvasH         = document.getElementById('canvasH');
+  const resizeCanvasBtn = document.getElementById('resizeCanvasBtn');
 
-    function setStatus(text) {
-      statusEl.textContent = text;
-    }
+  /* == State ========================================= */
+  let badges           = [];
+  let selectedId       = null;
+  let drawMode         = false;
+  let drawing          = null;
+  let dragState        = null;
+  let canvasResizeState = null;
+  let material = { type: 'empty', html: '', imageDataUrl: '', imageName: '' };
 
-    function uid() {
-      return 'badge-' + Math.random().toString(36).slice(2, 10);
-    }
+  /* == Utilities ===================================== */
+  function uid() {
+    return 'b-' + Math.random().toString(36).slice(2, 9);
+  }
 
-    function setStageSize(width, height) {
-      const w = Math.max(200, Math.round(Number(width) || 900));
-      const h = Math.max(200, Math.round(Number(height) || 560));
-      stage.style.width = w + 'px';
-      stage.style.height = h + 'px';
-      canvasW.value = w;
-      canvasH.value = h;
-      canvasSizeLabel.textContent = w + ' × ' + h;
-      renderBadges(false);
-    }
+  function setStatus(text) {
+    statusEl.textContent = text;
+  }
 
-    function getStagePoint(evt) {
-      const rect = overlayLayer.getBoundingClientRect();
-      return {
-        x: evt.clientX - rect.left,
-        y: evt.clientY - rect.top
+  function setDrawMode(on) {
+    drawMode = on;
+    addModeBtn.setAttribute('aria-pressed', String(on));
+    addModeBtn.textContent = on ? 'Exit Draw Mode' : 'Draw Frame';
+    statusDot.classList.toggle('is-draw', on);
+    setStatus(on
+      ? 'Draw mode on — drag on the canvas to create a badge frame. Press Esc to exit.'
+      : 'Draw mode off. Click a badge to select it.');
+  }
+
+  function showToast(msg, type = 'info') {
+    const root = document.getElementById('toastRoot');
+    const el = document.createElement('div');
+    el.className = 'toast toast-' + type;
+    el.textContent = msg;
+    root.appendChild(el);
+    requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('show')));
+    const ttl = type === 'error' ? 5000 : 3000;
+    setTimeout(() => {
+      el.classList.remove('show');
+      el.addEventListener('transitionend', () => el.remove(), { once: true });
+    }, ttl);
+  }
+
+  function setStageSize(width, height) {
+    const w = Math.max(200, Math.round(Number(width)  || 900));
+    const h = Math.max(200, Math.round(Number(height) || 560));
+    stage.style.width  = w + 'px';
+    stage.style.height = h + 'px';
+    canvasW.value = w;
+    canvasH.value = h;
+    canvasSizeLabel.textContent = w + ' × ' + h;
+    renderBadges(false);
+  }
+
+  function getStagePoint(evt) {
+    const r = overlayLayer.getBoundingClientRect();
+    return { x: evt.clientX - r.left, y: evt.clientY - r.top };
+  }
+
+  function clampBadge(b) {
+    const mw = overlayLayer.offsetWidth;
+    const mh = overlayLayer.offsetHeight;
+    b.w = Math.max(12, b.w);
+    b.h = Math.max(12, b.h);
+    b.x = Math.max(0, Math.min(b.x, mw - 8));
+    b.y = Math.max(0, Math.min(b.y, mh - 8));
+    return b;
+  }
+
+  function defaultBadgeProps() {
+    return { label: 'NEW', color: '#ff9800', fillColor: '#ff9800', fillAlpha: 0.07, badgeSize: 'm' };
+  }
+
+  function hexAlpha(hex, a) {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r},${g},${b},${a})`;
+  }
+
+  /* == Render ======================================== */
+  const PLACEHOLDER_HTML = `
+    <div class="placeholder">
+      <svg class="ph-icon" viewBox="0 0 36 36" fill="none" stroke="currentColor"
+           stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="4" y="7" width="28" height="22" rx="2.5"/>
+        <rect x="8" y="11" width="7" height="7" rx="1.5"/>
+        <line x1="19" y1="13" x2="29" y2="13"/>
+        <line x1="19" y1="16.5" x2="26" y2="16.5"/>
+        <line x1="8" y1="22" x2="29" y2="22"/>
+        <line x1="8" y1="25.5" x2="22" y2="25.5"/>
+      </svg>
+      <div>
+        <strong>No material loaded</strong>
+        <p>Load an HTML file or image above, then draw badge frames over the areas you want to mark.</p>
+      </div>
+    </div>`;
+
+  function renderMaterial() {
+    if (material.type === 'html') {
+      contentLayer.innerHTML = '<iframe id="htmlPreview" sandbox="allow-same-origin" title="Loaded HTML preview"></iframe>';
+      document.getElementById('htmlPreview').srcdoc = material.html;
+    } else if (material.type === 'image') {
+      contentLayer.innerHTML = '';
+      const img = document.createElement('img');
+      img.className = 'loaded-image';
+      img.src = material.imageDataUrl;
+      img.alt = material.imageName || 'Loaded image';
+      img.onload = () => {
+        setStageSize(img.naturalWidth || 900, img.naturalHeight || 560);
+        renderBadges();
       };
+      contentLayer.appendChild(img);
+    } else {
+      contentLayer.innerHTML = PLACEHOLDER_HTML;
     }
+  }
 
-    function clampBadge(b) {
-      const maxW = overlayLayer.offsetWidth;
-      const maxH = overlayLayer.offsetHeight;
-      b.w = Math.max(12, b.w);
-      b.h = Math.max(12, b.h);
-      b.x = Math.max(0, Math.min(b.x, maxW - 8));
-      b.y = Math.max(0, Math.min(b.y, maxH - 8));
-      return b;
-    }
+  function renderBadges(updatePanels = true) {
+    overlayLayer.innerHTML = '';
+    badges.forEach((badge, idx) => {
+      clampBadge(badge);
+      const el = document.createElement('div');
+      el.className = 'new-change-highlight' + (badge.id === selectedId ? ' selected' : '');
+      el.dataset.id    = badge.id;
+      el.dataset.label = badge.label    || 'NEW';
+      el.dataset.size  = badge.badgeSize || 'm';
+      el.style.left    = badge.x + 'px';
+      el.style.top     = badge.y + 'px';
+      el.style.width   = badge.w + 'px';
+      el.style.height  = badge.h + 'px';
+      el.style.setProperty('--b-color', badge.color || '#ff9800');
+      el.style.setProperty('--b-fill',  hexAlpha(badge.fillColor || '#ff9800', badge.fillAlpha ?? 0.07));
+      el.style.setProperty('--b-glow',  hexAlpha(badge.color || '#ff9800', 0.45));
+      el.title = 'Badge ' + (idx + 1);
 
-    function renderMaterial() {
-      if (material.type === 'html') {
-        contentLayer.innerHTML = '<iframe id="htmlPreview" sandbox="allow-same-origin" title="Loaded HTML preview"></iframe>';
-        document.getElementById('htmlPreview').srcdoc = material.html;
-      } else if (material.type === 'image') {
-        contentLayer.innerHTML = '';
-        const img = document.createElement('img');
-        img.className = 'loaded-image';
-        img.src = material.imageDataUrl;
-        img.alt = material.imageName || 'Loaded image';
-        img.onload = () => {
-          setStageSize(img.naturalWidth || 900, img.naturalHeight || 560);
-          renderBadges();
+      const handle = document.createElement('div');
+      handle.className = 'resize-handle';
+      el.appendChild(handle);
+
+      el.addEventListener('pointerdown', (evt) => {
+        evt.stopPropagation();
+        selectedId = badge.id;
+        renderBadges();
+        const isResize = evt.target.classList.contains('resize-handle');
+        const start = getStagePoint(evt);
+        dragState = {
+          id: badge.id,
+          mode: isResize ? 'resize' : 'move',
+          startX: start.x, startY: start.y,
+          original: { ...badge }
         };
-        contentLayer.appendChild(img);
-      } else {
-        contentLayer.innerHTML = `
-          <div class="placeholder">
-            <div>
-              <strong>No material loaded yet.</strong><br />
-              Load an HTML file or image, draw multiple NEW badge borders, then export.
-            </div>
-          </div>`;
-      }
-    }
-
-    function renderBadges(updatePanels = true) {
-      overlayLayer.innerHTML = '';
-
-      badges.forEach((badge, index) => {
-        clampBadge(badge);
-
-        const el = document.createElement('div');
-        el.className = 'new-change-highlight' + (badge.id === selectedId ? ' selected' : '');
-        el.dataset.id = badge.id;
-        el.style.left = badge.x + 'px';
-        el.style.top = badge.y + 'px';
-        el.style.width = badge.w + 'px';
-        el.style.height = badge.h + 'px';
-        el.title = 'Badge ' + (index + 1);
-
-        const handle = document.createElement('div');
-        handle.className = 'resize-handle';
-        el.appendChild(handle);
-
-        el.addEventListener('pointerdown', (evt) => {
-          evt.stopPropagation();
-          selectedId = badge.id;
-          renderBadges();
-
-          const isResize = evt.target.classList.contains('resize-handle');
-          const start = getStagePoint(evt);
-          dragState = {
-            id: badge.id,
-            mode: isResize ? 'resize' : 'move',
-            startX: start.x,
-            startY: start.y,
-            original: { ...badge }
-          };
-          el.setPointerCapture(evt.pointerId);
-        });
-
-        overlayLayer.appendChild(el);
+        el.setPointerCapture(evt.pointerId);
       });
 
-      if (updatePanels) {
-        renderList();
-        renderEditor();
-      }
+      overlayLayer.appendChild(el);
+    });
+
+    if (updatePanels) {
+      renderList();
+      renderEditor();
+      updatePill();
+    }
+  }
+
+  function updatePill() {
+    const n = badges.length;
+    badgePill.textContent = n;
+    badgePill.setAttribute('aria-label', n + (n === 1 ? ' badge' : ' badges'));
+    badgePill.classList.toggle('has-items', n > 0);
+  }
+
+  function renderList() {
+    if (!badges.length) {
+      badgeList.innerHTML = '<p class="empty-msg center">Draw a frame on the canvas to add a badge.</p>';
+      return;
+    }
+    badgeList.innerHTML = '';
+    badges.forEach((badge, idx) => {
+      const item = document.createElement('div');
+      item.className = 'badge-item' + (badge.id === selectedId ? ' active' : '');
+
+      const num = document.createElement('span');
+      num.className = 'badge-num';
+      num.textContent = idx + 1;
+      item.appendChild(num);
+
+      item.appendChild(document.createTextNode(
+        Math.round(badge.x) + ', ' + Math.round(badge.y) +
+        ' · ' + Math.round(badge.w) + '×' + Math.round(badge.h)
+      ));
+
+      item.addEventListener('click', () => { selectedId = badge.id; renderBadges(); });
+      badgeList.appendChild(item);
+    });
+  }
+
+  function selectedBadge() {
+    return badges.find(b => b.id === selectedId);
+  }
+
+  function renderEditor() {
+    const b = selectedBadge();
+    if (!b) {
+      editor.innerHTML = '<p class="empty-msg">Select a badge to edit its position and size.</p>';
+      return;
     }
 
-    function renderList() {
-      if (!badges.length) {
-        badgeList.className = 'empty';
-        badgeList.textContent = 'No badges yet.';
-        return;
-      }
+    const alpha  = b.fillAlpha ?? 0.07;
+    const size   = b.badgeSize || 'm';
+    const color  = b.color     || '#ff9800';
+    const fill   = b.fillColor || '#ff9800';
+    const label  = b.label     || 'NEW';
 
-      badgeList.className = '';
-      badgeList.innerHTML = '';
-      badges.forEach((badge, index) => {
-        const item = document.createElement('div');
-        item.className = 'badge-item' + (badge.id === selectedId ? ' active' : '');
-        item.textContent = `Badge ${index + 1}: x ${Math.round(badge.x)}, y ${Math.round(badge.y)}, ${Math.round(badge.w)} × ${Math.round(badge.h)}`;
-        item.addEventListener('click', () => {
-          selectedId = badge.id;
-          renderBadges();
-        });
-        badgeList.appendChild(item);
-      });
-    }
+    editor.innerHTML = `
+      <datalist id="label-list">
+        <option value="NEW"><option value="UPDATED"><option value="CHANGED">
+        <option value="FIXED"><option value="BETA"><option value="IMPROVED">
+        <option value="COMING SOON">
+      </datalist>
 
-    function selectedBadge() {
-      return badges.find(b => b.id === selectedId);
-    }
-
-    function renderEditor() {
-      const b = selectedBadge();
-      if (!b) {
-        editor.innerHTML = '<p class="empty">Select a badge frame to edit its position and size.</p>';
-        return;
-      }
-
-      editor.innerHTML = `
-        <div class="grid-2">
-          <div class="field">
-            <label>X</label>
-            <input data-prop="x" type="number" value="${Math.round(b.x)}" />
-          </div>
-          <div class="field">
-            <label>Y</label>
-            <input data-prop="y" type="number" value="${Math.round(b.y)}" />
-          </div>
-          <div class="field">
-            <label>Width</label>
-            <input data-prop="w" type="number" min="12" value="${Math.round(b.w)}" />
-          </div>
-          <div class="field">
-            <label>Height</label>
-            <input data-prop="h" type="number" min="12" value="${Math.round(b.h)}" />
-          </div>
+      <div class="prop-grid">
+        <div class="prop-field">
+          <label class="prop-label" for="px">X</label>
+          <input id="px" class="prop-input" data-prop="x" type="number" value="${Math.round(b.x)}" />
         </div>
-        <button id="deleteSelectedBtn" class="danger" type="button">Delete Selected Badge</button>
-      `;
+        <div class="prop-field">
+          <label class="prop-label" for="py">Y</label>
+          <input id="py" class="prop-input" data-prop="y" type="number" value="${Math.round(b.y)}" />
+        </div>
+        <div class="prop-field">
+          <label class="prop-label" for="pw">Width</label>
+          <input id="pw" class="prop-input" data-prop="w" type="number" min="12" value="${Math.round(b.w)}" />
+        </div>
+        <div class="prop-field">
+          <label class="prop-label" for="ph">Height</label>
+          <input id="ph" class="prop-input" data-prop="h" type="number" min="12" value="${Math.round(b.h)}" />
+        </div>
+      </div>
 
-      editor.querySelectorAll('input[data-prop]').forEach(input => {
+      <div class="prop-section-sep"></div>
+
+      <div class="prop-field" style="margin-bottom:8px">
+        <label class="prop-label" for="plabel">Label</label>
+        <input id="plabel" class="prop-input" type="text" list="label-list"
+               maxlength="20" value="${esc(label)}" placeholder="e.g. NEW, BETA, FIXED" />
+      </div>
+
+      <div class="prop-color-row">
+        <div class="prop-field">
+          <label class="prop-label" for="pcolor">Border &amp; Badge</label>
+          <input id="pcolor" class="prop-color" data-prop="color" type="color" value="${color}" />
+        </div>
+        <div class="prop-field">
+          <label class="prop-label" for="pfill">Fill Color</label>
+          <input id="pfill" class="prop-color" data-prop="fillColor" type="color" value="${fill}" />
+        </div>
+      </div>
+
+      <div class="prop-field" style="margin-bottom:8px">
+        <div class="prop-alpha-row">
+          <label class="prop-label" for="palpha">Fill Opacity</label>
+          <span class="prop-alpha-val" id="alphaVal">${Math.round(alpha * 100)}%</span>
+        </div>
+        <input id="palpha" class="prop-slider" type="range" min="0" max="1" step="0.01" value="${alpha}" />
+      </div>
+
+      <div class="prop-field" style="margin-bottom:10px">
+        <label class="prop-label">Badge Size</label>
+        <div class="size-btns">
+          <button class="size-btn${size==='s'?' active':''}" data-size="s" type="button">S</button>
+          <button class="size-btn${size==='m'?' active':''}" data-size="m" type="button">M</button>
+          <button class="size-btn${size==='l'?' active':''}" data-size="l" type="button">L</button>
+        </div>
+      </div>
+
+      <button id="delBtn" class="btn btn-full btn-danger" type="button">Delete badge</button>
+    `;
+
+    // Position / size
+    editor.querySelectorAll('input[data-prop="x"], input[data-prop="y"], input[data-prop="w"], input[data-prop="h"]')
+      .forEach(input => {
         input.addEventListener('change', () => {
-          const prop = input.dataset.prop;
-          b[prop] = Number(input.value) || 0;
+          b[input.dataset.prop] = Number(input.value) || 0;
           clampBadge(b);
           renderBadges();
         });
       });
 
-      document.getElementById('deleteSelectedBtn').addEventListener('click', () => {
-        badges = badges.filter(badge => badge.id !== selectedId);
-        selectedId = badges[0]?.id || null;
+    // Label
+    document.getElementById('plabel').addEventListener('input', e => {
+      b.label = e.target.value.trim() || 'NEW';
+      renderBadges(false);
+      renderList();
+      updatePill();
+    });
+
+    // Color pickers
+    editor.querySelectorAll('.prop-color').forEach(input => {
+      input.addEventListener('input', () => {
+        b[input.dataset.prop] = input.value;
         renderBadges();
       });
-    }
-
-    addModeBtn.addEventListener('click', () => {
-      drawMode = !drawMode;
-      addModeBtn.textContent = drawMode ? 'Drawing Mode: ON' : 'Draw New Badge Frame';
-      addModeBtn.classList.toggle('primary', !drawMode);
-      setStatus(drawMode
-        ? 'Drawing mode is ON. Drag on the material to create a NEW badge frame.'
-        : 'Drawing mode is OFF. Select existing frames to move, resize, edit, or delete.'
-      );
     });
 
-    document.querySelectorAll('[data-canvas-resize]').forEach(handle => {
-      handle.addEventListener('pointerdown', (evt) => {
-        evt.preventDefault();
-        evt.stopPropagation();
-        canvasResizeState = {
-          mode: handle.dataset.canvasResize,
-          startX: evt.clientX,
-          startY: evt.clientY,
-          startW: stage.offsetWidth,
-          startH: stage.offsetHeight
-        };
-        handle.setPointerCapture(evt.pointerId);
-        setStatus('Canvas resize active. Drag to set the final canvas size.');
-      });
-    });
-
-    document.addEventListener('pointermove', (evt) => {
-      if (!canvasResizeState) return;
-
-      const dx = evt.clientX - canvasResizeState.startX;
-      const dy = evt.clientY - canvasResizeState.startY;
-      let nextW = canvasResizeState.startW;
-      let nextH = canvasResizeState.startH;
-
-      if (canvasResizeState.mode === 'right' || canvasResizeState.mode === 'corner') {
-        nextW = canvasResizeState.startW + dx;
-      }
-      if (canvasResizeState.mode === 'bottom' || canvasResizeState.mode === 'corner') {
-        nextH = canvasResizeState.startH + dy;
-      }
-
-      setStageSize(nextW, nextH);
-    });
-
-    document.addEventListener('pointerup', () => {
-      if (canvasResizeState) {
-        setStatus('Canvas resized. You can now draw or export.');
-      }
-      canvasResizeState = null;
-      dragState = null;
-    });
-
-    overlayLayer.addEventListener('pointerdown', (evt) => {
-      if (!drawMode) {
-        selectedId = null;
-        renderBadges();
-        return;
-      }
-
-      const start = getStagePoint(evt);
-      drawing = {
-        startX: Math.max(0, start.x),
-        startY: Math.max(0, start.y),
-        box: document.createElement('div')
-      };
-
-      drawing.box.className = 'drawing-box';
-      drawing.box.style.left = drawing.startX + 'px';
-      drawing.box.style.top = drawing.startY + 'px';
-      drawing.box.style.width = '0px';
-      drawing.box.style.height = '0px';
-      overlayLayer.appendChild(drawing.box);
-      overlayLayer.setPointerCapture(evt.pointerId);
-    });
-
-    overlayLayer.addEventListener('pointermove', (evt) => {
-      const point = getStagePoint(evt);
-
-      if (drawing) {
-        const x = Math.min(drawing.startX, point.x);
-        const y = Math.min(drawing.startY, point.y);
-        const w = Math.abs(point.x - drawing.startX);
-        const h = Math.abs(point.y - drawing.startY);
-
-        drawing.box.style.left = x + 'px';
-        drawing.box.style.top = y + 'px';
-        drawing.box.style.width = w + 'px';
-        drawing.box.style.height = h + 'px';
-      }
-
-      if (dragState) {
-        const b = badges.find(item => item.id === dragState.id);
-        if (!b) return;
-
-        const dx = point.x - dragState.startX;
-        const dy = point.y - dragState.startY;
-
-        if (dragState.mode === 'move') {
-          b.x = dragState.original.x + dx;
-          b.y = dragState.original.y + dy;
-        } else {
-          b.w = dragState.original.w + dx;
-          b.h = dragState.original.h + dy;
-        }
-
-        clampBadge(b);
-        renderBadges();
-      }
-    });
-
-    overlayLayer.addEventListener('pointerup', (evt) => {
-      if (drawing) {
-        const point = getStagePoint(evt);
-        const x = Math.min(drawing.startX, point.x);
-        const y = Math.min(drawing.startY, point.y);
-        const w = Math.abs(point.x - drawing.startX);
-        const h = Math.abs(point.y - drawing.startY);
-
-        drawing.box.remove();
-
-        if (w > 8 && h > 8) {
-          const badge = clampBadge({ id: uid(), x, y, w, h });
-          badges.push(badge);
-          selectedId = badge.id;
-          setStatus('Badge added. Drag it to move, use the black handle to resize, or edit values in the sidebar.');
-        }
-
-        drawing = null;
-        renderBadges();
-      }
-
-      dragState = null;
-    });
-
-    clearBtn.addEventListener('click', () => {
-      if (!badges.length || confirm('Remove all badges?')) {
-        badges = [];
-        selectedId = null;
-        renderBadges();
-      }
-    });
-
-    resizeCanvasBtn.addEventListener('click', () => {
-      setStageSize(canvasW.value, canvasH.value);
-      setStatus('Canvas size applied.');
-    });
-
-    htmlInput.addEventListener('change', async () => {
-      const file = htmlInput.files[0];
-      if (!file) return;
-
-      material = {
-        type: 'html',
-        html: await file.text(),
-        imageDataUrl: '',
-        imageName: ''
-      };
-      badges = [];
-      selectedId = null;
-      renderMaterial();
+    // Alpha slider
+    document.getElementById('palpha').addEventListener('input', e => {
+      b.fillAlpha = parseFloat(e.target.value);
+      document.getElementById('alphaVal').textContent = Math.round(b.fillAlpha * 100) + '%';
       renderBadges();
-      setStatus('HTML loaded. The exported HTML will contain this loaded HTML plus annotation overlays.');
-      htmlInput.value = '';
     });
 
-    imageInput.addEventListener('change', () => {
-      const file = imageInput.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = () => {
-        material = {
-          type: 'image',
-          html: '',
-          imageDataUrl: reader.result,
-          imageName: file.name
-        };
-        badges = [];
-        selectedId = null;
-        renderMaterial();
+    // Size toggle
+    editor.querySelectorAll('.size-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        b.badgeSize = btn.dataset.size;
+        editor.querySelectorAll('.size-btn').forEach(x => x.classList.toggle('active', x === btn));
         renderBadges();
-        setStatus('Image loaded. Draw badge frames over the image.');
+      });
+    });
+
+    // Delete
+    document.getElementById('delBtn').addEventListener('click', () => {
+      badges = badges.filter(x => x.id !== selectedId);
+      selectedId = badges[0]?.id || null;
+      renderBadges();
+    });
+  }
+
+  /* == Draw mode ===================================== */
+  addModeBtn.addEventListener('click', () => setDrawMode(!drawMode));
+
+  document.addEventListener('keydown', evt => {
+    if (evt.key === 'Escape' && drawMode) setDrawMode(false);
+  });
+
+  /* == Canvas resize handles ========================= */
+  document.querySelectorAll('[data-canvas-resize]').forEach(handle => {
+    handle.addEventListener('pointerdown', evt => {
+      evt.preventDefault();
+      evt.stopPropagation();
+      canvasResizeState = {
+        mode: handle.dataset.canvasResize,
+        startX: evt.clientX, startY: evt.clientY,
+        startW: stage.offsetWidth, startH: stage.offsetHeight
       };
-      reader.readAsDataURL(file);
-      imageInput.value = '';
+      handle.setPointerCapture(evt.pointerId);
+      setStatus('Resizing canvas...');
     });
+  });
 
-    saveProjectBtn.addEventListener('click', () => {
-      const project = {
-        version: 2,
-        canvas: {
-          width: stage.offsetWidth,
-          height: stage.offsetHeight
-        },
-        material,
-        badges
-      };
-      downloadText('new-badge-project.json', JSON.stringify(project, null, 2), 'application/json');
-    });
+  document.addEventListener('pointermove', evt => {
+    if (!canvasResizeState) return;
+    const dx = evt.clientX - canvasResizeState.startX;
+    const dy = evt.clientY - canvasResizeState.startY;
+    let nw = canvasResizeState.startW;
+    let nh = canvasResizeState.startH;
+    if (canvasResizeState.mode === 'right'  || canvasResizeState.mode === 'corner') nw += dx;
+    if (canvasResizeState.mode === 'bottom' || canvasResizeState.mode === 'corner') nh += dy;
+    setStageSize(nw, nh);
+  });
 
-    projectInput.addEventListener('change', async () => {
-      const file = projectInput.files[0];
-      if (!file) return;
+  document.addEventListener('pointerup', () => {
+    if (canvasResizeState) setStatus('Canvas resized.');
+    canvasResizeState = null;
+    dragState = null;
+  });
 
-      try {
-        const project = JSON.parse(await file.text());
-        material = project.material || material;
-        badges = Array.isArray(project.badges) ? project.badges : [];
-        selectedId = badges[0]?.id || null;
-        setStageSize(project.canvas?.width || 900, project.canvas?.height || 560);
-        renderMaterial();
-        renderBadges();
-        setStatus('Project loaded.');
-      } catch (err) {
-        alert('Could not load project JSON.');
-      }
+  /* == Overlay pointer events ======================== */
+  overlayLayer.addEventListener('pointerdown', evt => {
+    if (!drawMode) { selectedId = null; renderBadges(); return; }
+    const start = getStagePoint(evt);
+    drawing = {
+      startX: Math.max(0, start.x),
+      startY: Math.max(0, start.y),
+      box: document.createElement('div')
+    };
+    drawing.box.className = 'drawing-box';
+    drawing.box.style.cssText = `left:${drawing.startX}px;top:${drawing.startY}px;width:0;height:0`;
+    overlayLayer.appendChild(drawing.box);
+    overlayLayer.setPointerCapture(evt.pointerId);
+  });
 
-      projectInput.value = '';
-    });
-
-    exportHtmlBtn.addEventListener('click', () => {
-      const exported = buildExportHtml();
-      downloadText('new-badge-export.html', exported, 'text/html');
-    });
-
-    exportImageBtn.addEventListener('click', () => {
-      exportPng();
-    });
-
-    function escapeHtml(str) {
-      return String(str || '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;');
+  overlayLayer.addEventListener('pointermove', evt => {
+    const pt = getStagePoint(evt);
+    if (drawing) {
+      const x = Math.min(drawing.startX, pt.x);
+      const y = Math.min(drawing.startY, pt.y);
+      const w = Math.abs(pt.x - drawing.startX);
+      const h = Math.abs(pt.y - drawing.startY);
+      drawing.box.style.left   = x + 'px';
+      drawing.box.style.top    = y + 'px';
+      drawing.box.style.width  = w + 'px';
+      drawing.box.style.height = h + 'px';
     }
-
-    function buildBadgeHtml() {
-      return badges.map((b) => `
-        <div class="new-change-highlight" style="left:${b.x}px;top:${b.y}px;width:${b.w}px;height:${b.h}px;"></div>
-      `).join('');
-    }
-
-    function buildExportHtml() {
-      const w = stage.offsetWidth;
-      const h = stage.offsetHeight;
-
-      if (material.type === 'html') {
-        return injectAnnotationsIntoHtml(material.html, w, h, buildBadgeHtml());
-      }
-
-      let materialHtml = '';
-      if (material.type === 'image') {
-        materialHtml = `<img src="${material.imageDataUrl}" alt="${escapeHtml(material.imageName || 'Exported image')}" class="exported-image" />`;
+    if (dragState) {
+      const b = badges.find(x => x.id === dragState.id);
+      if (!b) return;
+      const dx = pt.x - dragState.startX;
+      const dy = pt.y - dragState.startY;
+      if (dragState.mode === 'move') {
+        b.x = dragState.original.x + dx;
+        b.y = dragState.original.y + dy;
       } else {
-        materialHtml = '<div class="empty-export">No material loaded.</div>';
+        b.w = dragState.original.w + dx;
+        b.h = dragState.original.h + dy;
       }
+      clampBadge(b);
+      renderBadges();
+    }
+  });
 
-      return `<!doctype html>
+  overlayLayer.addEventListener('pointerup', evt => {
+    if (drawing) {
+      const pt = getStagePoint(evt);
+      const x = Math.min(drawing.startX, pt.x);
+      const y = Math.min(drawing.startY, pt.y);
+      const w = Math.abs(pt.x - drawing.startX);
+      const h = Math.abs(pt.y - drawing.startY);
+      drawing.box.remove();
+      if (w > 8 && h > 8) {
+        const badge = clampBadge({ id: uid(), x, y, w, h, ...defaultBadgeProps() });
+        badges.push(badge);
+        selectedId = badge.id;
+        setStatus('Badge added. Drag to move; use the corner handle to resize.');
+      }
+      drawing = null;
+      renderBadges();
+    }
+    dragState = null;
+  });
+
+  /* == Toolbar actions =============================== */
+  clearBtn.addEventListener('click', async () => {
+    if (!badges.length) {
+      badges = []; selectedId = null;
+      renderBadges();
+      setStatus('All badges cleared.');
+      return;
+    }
+    const ok = await showConfirm({
+      title: 'Clear all badges?',
+      body: `This will permanently remove all ${badges.length} badge${badges.length === 1 ? '' : 's'} from the canvas. This action cannot be undone.`,
+      confirmLabel: 'Clear all',
+      cancelLabel: 'Keep badges',
+      variant: 'danger'
+    });
+    if (ok) {
+      badges = []; selectedId = null;
+      renderBadges();
+      setStatus('All badges cleared.');
+    }
+  });
+
+  resizeCanvasBtn.addEventListener('click', () => {
+    setStageSize(canvasW.value, canvasH.value);
+    setStatus('Canvas size updated.');
+  });
+
+  htmlInput.addEventListener('change', async () => {
+    const f = htmlInput.files[0]; if (!f) return;
+    material = { type: 'html', html: await f.text(), imageDataUrl: '', imageName: '' };
+    badges = []; selectedId = null;
+    renderMaterial(); renderBadges();
+    setStatus('HTML loaded. Draw badge frames, then export.');
+    htmlInput.value = '';
+  });
+
+  imageInput.addEventListener('change', () => {
+    const f = imageInput.files[0]; if (!f) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      material = { type: 'image', html: '', imageDataUrl: reader.result, imageName: f.name };
+      badges = []; selectedId = null;
+      renderMaterial(); renderBadges();
+      setStatus('Image loaded. Draw badge frames over it.');
+    };
+    reader.readAsDataURL(f);
+    imageInput.value = '';
+  });
+
+  saveProjectBtn.addEventListener('click', () => {
+    const project = {
+      version: 2,
+      canvas: { width: stage.offsetWidth, height: stage.offsetHeight },
+      material, badges
+    };
+    downloadText('badge-annotator-project.json', JSON.stringify(project, null, 2), 'application/json');
+    showToast('Project saved', 'success');
+  });
+
+  projectInput.addEventListener('change', async () => {
+    const f = projectInput.files[0]; if (!f) return;
+    try {
+      const p = JSON.parse(await f.text());
+      material   = p.material || material;
+      const def  = defaultBadgeProps();
+      badges     = Array.isArray(p.badges) ? p.badges.map(b => ({ ...def, ...b })) : [];
+      selectedId = badges[0]?.id || null;
+      setStageSize(p.canvas?.width || 900, p.canvas?.height || 560);
+      renderMaterial(); renderBadges();
+      setStatus('Project loaded.');
+      showToast('Project loaded', 'success');
+    } catch {
+      showToast('Could not read project file. Make sure it is a valid JSON export.', 'error');
+    }
+    projectInput.value = '';
+  });
+
+  exportHtmlBtn.addEventListener('click', () => {
+    downloadText('badge-annotator-export.html', buildExportHtml(), 'text/html');
+    showToast('HTML file downloaded', 'success');
+  });
+
+  exportImageBtn.addEventListener('click', () => exportPng());
+
+  /* == Export ======================================== */
+  function esc(str) {
+    return String(str || '')
+      .replaceAll('&','&amp;').replaceAll('<','&lt;')
+      .replaceAll('>','&gt;').replaceAll('"','&quot;');
+  }
+
+  function badgesHtml() {
+    return badges.map(b => {
+      const style = [
+        `left:${b.x}px`, `top:${b.y}px`, `width:${b.w}px`, `height:${b.h}px`,
+        `--b-color:${b.color || '#ff9800'}`,
+        `--b-fill:${hexAlpha(b.fillColor || '#ff9800', b.fillAlpha ?? 0.07)}`,
+        `--b-glow:${hexAlpha(b.color || '#ff9800', 0.45)}`
+      ].join(';');
+      return `<div class="new-change-highlight" data-label="${esc(b.label || 'NEW')}" data-size="${b.badgeSize || 'm'}" style="${style}"></div>`;
+    }).join('\n');
+  }
+
+  function buildExportHtml() {
+    const w = stage.offsetWidth, h = stage.offsetHeight;
+    if (material.type === 'html') return injectIntoHtml(material.html, w, h, badgesHtml());
+
+    const body = material.type === 'image'
+      ? `<img src="${material.imageDataUrl}" alt="${esc(material.imageName || 'Exported image')}" class="ei" />`
+      : '<div class="ee">No material loaded.</div>';
+
+    return `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>NEW Badge Export</title>
+<title>Badge Annotator Export</title>
 ${exportCss(w, h)}
 </head>
 <body>
-  <div class="export-stage">
-    ${materialHtml}
-    ${buildBadgeHtml()}
-  </div>
+<div class="es">${body}
+${badgesHtml()}
+</div>
 </body>
 </html>`;
-    }
-
-    function exportCss(w, h) {
-      return `<style>
-  body {
-    margin: 0;
-    padding: 20px;
-    background: #f5f6f8;
-    font-family: Arial, Helvetica, sans-serif;
   }
 
-  .export-stage {
-    position: relative;
-    width: ${w}px;
-    height: ${h}px;
-    background: white;
-    overflow: visible;
-    border: 1px solid #d8dde8;
-  }
-
-  .exported-image {
-    display: block;
-    width: ${w}px;
-    height: ${h}px;
-    object-fit: contain;
-  }
-
-  .empty-export {
-    width: 100%;
-    height: 100%;
-    display: grid;
-    place-items: center;
-    color: #677083;
-  }
-
-  /* New / changed area highlight */
-  .new-change-highlight {
-    border: 2px solid #ff9800 !important;
-    background: rgba(255, 248, 225, 0.55) !important;
-    border-radius: 4px;
-    position: absolute;
-    overflow: visible !important;
-    animation: changePulse 2s ease-in-out infinite;
-    pointer-events: none;
-    z-index: 2147483640;
-  }
-
-  /* NEW badge */
-  .new-change-highlight::before {
-    content: "NEW";
-    position: absolute;
-    top: -12px;
-    right: -8px;
-    background: #ff9800;
-    color: #fff;
-    font-size: 9px;
-    font-weight: bold;
-    line-height: 1;
-    padding: 3px 5px;
-    border-radius: 8px;
-    z-index: 9999;
-    pointer-events: none;
-    white-space: nowrap;
-  }
-
-  @keyframes changePulse {
-    0% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.45); }
-    70% { box-shadow: 0 0 0 8px rgba(255, 152, 0, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0); }
-  }
+  function exportCss(w, h) {
+    return `<style>
+body{margin:0;padding:20px;background:#f5f6f8;font-family:system-ui,sans-serif}
+.es{position:relative;width:${w}px;height:${h}px;background:#fff;overflow:visible;border:1px solid #d8dde8}
+.ei{display:block;width:${w}px;height:${h}px;object-fit:contain}
+.ee{width:100%;height:100%;display:grid;place-items:center;color:#677083}
+.new-change-highlight{border:2px solid var(--b-color,#ff9800)!important;background:var(--b-fill,rgba(255,152,0,.07))!important;border-radius:5px;position:absolute;overflow:visible!important;animation:bp 2.5s ease-out infinite;pointer-events:none;z-index:2147483640}
+.new-change-highlight::before{content:attr(data-label);position:absolute;top:-11px;right:-6px;background:var(--b-color,#ff9800);color:#fff;font-family:system-ui,sans-serif;font-size:9px;font-weight:700;letter-spacing:.05em;line-height:1;padding:3px 5px;border-radius:4px;pointer-events:none;white-space:nowrap}
+.new-change-highlight[data-size="s"]::before{font-size:8px;padding:2px 4px;top:-9px}
+.new-change-highlight[data-size="m"]::before{font-size:9px;padding:3px 5px;top:-11px}
+.new-change-highlight[data-size="l"]::before{font-size:11px;padding:5px 8px;top:-15px}
+@keyframes bp{0%{box-shadow:0 0 0 0 var(--b-glow,rgba(255,152,0,.45))}70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
 </style>`;
+  }
+
+  function injectIntoHtml(src, w, h, bHtml) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(src, 'text/html');
+    const style = doc.createElement('style');
+    style.textContent = `
+.nbe-wrap{position:relative!important;width:${w}px!important;min-height:${h}px!important;overflow:visible!important}
+.nbe-ov{position:absolute!important;inset:0 auto auto 0!important;width:${w}px!important;height:${h}px!important;pointer-events:none!important;z-index:2147483640!important;overflow:visible!important}
+.nbe-ov .new-change-highlight{border:2px solid var(--b-color,#ff9800)!important;background:var(--b-fill,rgba(255,152,0,.07))!important;border-radius:5px!important;position:absolute!important;overflow:visible!important;animation:bp 2.5s ease-out infinite!important;pointer-events:none!important}
+.nbe-ov .new-change-highlight::before{content:attr(data-label);position:absolute;top:-11px;right:-6px;background:var(--b-color,#ff9800);color:#fff;font-family:system-ui,sans-serif;font-size:9px;font-weight:700;letter-spacing:.05em;line-height:1;padding:3px 5px;border-radius:4px;pointer-events:none;white-space:nowrap}
+.nbe-ov .new-change-highlight[data-size="s"]::before{font-size:8px;padding:2px 4px;top:-9px}
+.nbe-ov .new-change-highlight[data-size="m"]::before{font-size:9px;padding:3px 5px;top:-11px}
+.nbe-ov .new-change-highlight[data-size="l"]::before{font-size:11px;padding:5px 8px;top:-15px}
+@keyframes bp{0%{box-shadow:0 0 0 0 var(--b-glow,rgba(255,152,0,.45))}70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}`;
+    doc.head.appendChild(style);
+
+    const wrap = doc.createElement('div');
+    wrap.className = 'nbe-wrap';
+    Array.from(doc.body.childNodes).forEach(n => wrap.appendChild(n));
+
+    const ov = doc.createElement('div');
+    ov.className = 'nbe-ov';
+    ov.innerHTML = bHtml;
+    wrap.appendChild(ov);
+
+    doc.body.innerHTML = '';
+    doc.body.appendChild(wrap);
+    return '<!doctype html>\n' + doc.documentElement.outerHTML;
+  }
+
+  async function exportPng() {
+    const w = stage.offsetWidth, h = stage.offsetHeight;
+    if (material.type === 'image') { await exportImgPng(w, h); return; }
+    if (material.type === 'html') {
+      const ok = await exportHtmlPngFallback(w, h);
+      if (!ok) showToast('PNG export for HTML is limited by browsers. Use Export HTML instead, then screenshot it.', 'info');
+      return;
     }
+    await exportBlankPng(w, h);
+  }
 
-    function injectAnnotationsIntoHtml(originalHtml, w, h, badgeHtml) {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(originalHtml, 'text/html');
+  async function exportImgPng(w, h) {
+    const c = makeCanvas(w, h);
+    const img = await loadImg(material.imageDataUrl);
+    const fit = contain(img.naturalWidth, img.naturalHeight, w, h);
+    c.ctx.drawImage(img, fit.x, fit.y, fit.w, fit.h);
+    paintBadges(c.ctx);
+    blobDownload(c.el, 'badge-annotator-export.png');
+    showToast('PNG downloaded', 'success');
+  }
 
-      const style = doc.createElement('style');
-      style.textContent = `
-        .new-badge-export-wrapper {
-          position: relative !important;
-          width: ${w}px !important;
-          min-height: ${h}px !important;
-          overflow: visible !important;
-          background: transparent !important;
-        }
+  async function exportBlankPng(w, h) {
+    const c = makeCanvas(w, h);
+    paintBadges(c.ctx);
+    blobDownload(c.el, 'badge-annotator-export.png');
+    showToast('PNG downloaded', 'success');
+  }
 
-        .new-badge-export-overlay {
-          position: absolute !important;
-          inset: 0 auto auto 0 !important;
-          width: ${w}px !important;
-          height: ${h}px !important;
-          pointer-events: none !important;
-          z-index: 2147483640 !important;
-          overflow: visible !important;
-        }
+  async function exportHtmlPngFallback(w, h) {
+    try {
+      const html = injectIntoHtml(material.html, w, h, badgesHtml());
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">
+        <foreignObject width="100%" height="100%">
+          ${new XMLSerializer().serializeToString(
+            new DOMParser().parseFromString(html, 'text/html').documentElement
+          )}
+        </foreignObject></svg>`;
+      const img = await loadImg('data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg));
+      const c = makeCanvas(w, h);
+      c.ctx.drawImage(img, 0, 0);
+      blobDownload(c.el, 'badge-annotator-export.png');
+      showToast('PNG downloaded', 'success');
+      return true;
+    } catch { return false; }
+  }
 
-        .new-badge-export-overlay .new-change-highlight {
-          border: 2px solid #ff9800 !important;
-          background: rgba(255, 248, 225, 0.55) !important;
-          border-radius: 4px !important;
-          position: absolute !important;
-          overflow: visible !important;
-          animation: changePulse 2s ease-in-out infinite !important;
-          pointer-events: none !important;
-        }
+  function makeCanvas(w, h) {
+    const el = document.createElement('canvas');
+    el.width = w; el.height = h;
+    const ctx = el.getContext('2d');
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, w, h);
+    return { el, ctx };
+  }
 
-        .new-badge-export-overlay .new-change-highlight::before {
-          content: "NEW";
-          position: absolute;
-          top: -12px;
-          right: -8px;
-          background: #ff9800;
-          color: #fff;
-          font-size: 9px;
-          font-weight: bold;
-          line-height: 1;
-          padding: 3px 5px;
-          border-radius: 8px;
-          z-index: 9999;
-          pointer-events: none;
-          white-space: nowrap;
-        }
+  function contain(sw, sh, dw, dh) {
+    const s = Math.min(dw / sw, dh / sh);
+    return { x: (dw - sw*s)/2, y: (dh - sh*s)/2, w: sw*s, h: sh*s };
+  }
 
-        @keyframes changePulse {
-          0% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.45); }
-          70% { box-shadow: 0 0 0 8px rgba(255, 152, 0, 0); }
-          100% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0); }
-        }
-      `;
-      doc.head.appendChild(style);
+  function paintBadges(ctx) {
+    badges.forEach(b => {
+      const color    = b.color     || '#ff9800';
+      const fillBase = b.fillColor || '#ff9800';
+      const alpha    = b.fillAlpha ?? 0.07;
+      const label    = b.label     || 'NEW';
+      const fontSize = b.badgeSize === 's' ? 8 : b.badgeSize === 'l' ? 11 : 9;
+      const padX     = b.badgeSize === 's' ? 4 : b.badgeSize === 'l' ? 7 : 5;
 
-      const originalNodes = Array.from(doc.body.childNodes);
-      const wrapper = doc.createElement('div');
-      wrapper.className = 'new-badge-export-wrapper';
+      ctx.save();
+      ctx.shadowColor = hexAlpha(color, 0.3);
+      ctx.shadowBlur  = 8;
+      ctx.fillStyle   = hexAlpha(fillBase, alpha);
+      ctx.strokeStyle = color;
+      ctx.lineWidth   = 2;
+      rrect(ctx, b.x, b.y, b.w, b.h, 5);
+      ctx.fill(); ctx.stroke();
+      ctx.shadowBlur = 0;
 
-      originalNodes.forEach(node => wrapper.appendChild(node));
+      ctx.font = `bold ${fontSize}px system-ui,Arial,sans-serif`;
+      const tw = ctx.measureText(label).width;
+      const bh = fontSize + 6;
+      const bw = tw + padX * 2;
+      const bx = b.x + b.w - 6;
+      const by = b.y - bh + 1;
+      ctx.fillStyle = color;
+      rrect(ctx, bx, by, bw, bh, 4);
+      ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(label, bx + padX, by + bh / 2 + 0.5);
+      ctx.restore();
+    });
+  }
 
-      const overlay = doc.createElement('div');
-      overlay.className = 'new-badge-export-overlay';
-      overlay.innerHTML = badgeHtml;
-      wrapper.appendChild(overlay);
+  function rrect(ctx, x, y, w, h, r) {
+    r = Math.min(r, w/2, h/2);
+    ctx.beginPath();
+    ctx.moveTo(x+r, y);
+    ctx.lineTo(x+w-r, y); ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+    ctx.lineTo(x+w, y+h-r); ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+    ctx.lineTo(x+r, y+h); ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+    ctx.lineTo(x, y+r); ctx.quadraticCurveTo(x, y, x+r, y);
+    ctx.closePath();
+  }
 
-      doc.body.innerHTML = '';
-      doc.body.appendChild(wrapper);
+  function loadImg(src) {
+    return new Promise((res, rej) => {
+      const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src;
+    });
+  }
 
-      return '<!doctype html>\n' + doc.documentElement.outerHTML;
-    }
-
-    async function exportPng() {
-      const w = stage.offsetWidth;
-      const h = stage.offsetHeight;
-
-      if (material.type === 'image') {
-        await exportImageMaterialPng(w, h);
-        return;
-      }
-
-      if (material.type === 'html') {
-        const ok = await exportHtmlMaterialPngFallback(w, h);
-        if (!ok) {
-          alert('PNG export for loaded HTML is browser-limited. Please use Export HTML, then screenshot/open it in a browser. PNG export works directly for image material.');
-        }
-        return;
-      }
-
-      await exportBlankPng(w, h);
-    }
-
-    async function exportImageMaterialPng(w, h) {
-      const canvas = document.createElement('canvas');
-      canvas.width = w;
-      canvas.height = h;
-      const ctx = canvas.getContext('2d');
-
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, w, h);
-
-      const img = await loadImage(material.imageDataUrl);
-      const fit = containRect(img.naturalWidth, img.naturalHeight, w, h);
-      ctx.drawImage(img, fit.x, fit.y, fit.w, fit.h);
-
-      drawBadgesOnCanvas(ctx);
-      downloadCanvas(canvas, 'new-badge-export.png');
-    }
-
-    async function exportBlankPng(w, h) {
-      const canvas = document.createElement('canvas');
-      canvas.width = w;
-      canvas.height = h;
-      const ctx = canvas.getContext('2d');
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, w, h);
-      drawBadgesOnCanvas(ctx);
-      downloadCanvas(canvas, 'new-badge-export.png');
-    }
-
-    async function exportHtmlMaterialPngFallback(w, h) {
-      // Browser security rules do not reliably allow rasterizing arbitrary loaded HTML.
-      // This SVG foreignObject method works only in some browsers and for simple self-contained HTML.
-      try {
-        const exportedHtml = injectAnnotationsIntoHtml(material.html, w, h, buildBadgeHtml());
-        const svg = `
-          <svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">
-            <foreignObject width="100%" height="100%">
-              ${new XMLSerializer().serializeToString(new DOMParser().parseFromString(exportedHtml, 'text/html').documentElement)}
-            </foreignObject>
-          </svg>`;
-        const dataUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
-        const img = await loadImage(dataUrl);
-        const canvas = document.createElement('canvas');
-        canvas.width = w;
-        canvas.height = h;
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, w, h);
-        ctx.drawImage(img, 0, 0);
-        downloadCanvas(canvas, 'new-badge-export.png');
-        return true;
-      } catch (err) {
-        return false;
-      }
-    }
-
-    function containRect(srcW, srcH, dstW, dstH) {
-      const scale = Math.min(dstW / srcW, dstH / srcH);
-      const w = srcW * scale;
-      const h = srcH * scale;
-      return {
-        x: (dstW - w) / 2,
-        y: (dstH - h) / 2,
-        w,
-        h
-      };
-    }
-
-    function drawBadgesOnCanvas(ctx) {
-      badges.forEach(b => {
-        ctx.save();
-
-        // Pulse shadow is static in PNG export.
-        ctx.shadowColor = 'rgba(255, 152, 0, 0.35)';
-        ctx.shadowBlur = 8;
-
-        ctx.fillStyle = 'rgba(255, 248, 225, 0.55)';
-        ctx.strokeStyle = '#ff9800';
-        ctx.lineWidth = 2;
-        roundedRect(ctx, b.x, b.y, b.w, b.h, 4);
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.shadowBlur = 0;
-
-        const badgeText = 'NEW';
-        ctx.font = 'bold 9px Arial, Helvetica, sans-serif';
-        const textW = ctx.measureText(badgeText).width;
-        const padX = 5;
-        const padY = 3;
-        const badgeW = textW + padX * 2;
-        const badgeH = 15;
-        const bx = b.x + b.w - 8;
-        const by = b.y - 12;
-
-        ctx.fillStyle = '#ff9800';
-        roundedRect(ctx, bx, by, badgeW, badgeH, 8);
-        ctx.fill();
-
-        ctx.fillStyle = '#ffffff';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(badgeText, bx + padX, by + badgeH / 2 + 0.5);
-
-        ctx.restore();
-      });
-    }
-
-    function roundedRect(ctx, x, y, w, h, r) {
-      const radius = Math.min(r, w / 2, h / 2);
-      ctx.beginPath();
-      ctx.moveTo(x + radius, y);
-      ctx.lineTo(x + w - radius, y);
-      ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
-      ctx.lineTo(x + w, y + h - radius);
-      ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
-      ctx.lineTo(x + radius, y + h);
-      ctx.quadraticCurveTo(x, y + h, x, y + h - radius);
-      ctx.lineTo(x, y + radius);
-      ctx.quadraticCurveTo(x, y, x + radius, y);
-      ctx.closePath();
-    }
-
-    function loadImage(src) {
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.onload = () => resolve(img);
-        img.onerror = reject;
-        img.src = src;
-      });
-    }
-
-    function downloadCanvas(canvas, filename) {
-      canvas.toBlob(blob => {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
-      }, 'image/png');
-    }
-
-    function downloadText(filename, text, mimeType) {
-      const blob = new Blob([text], { type: mimeType });
+  function blobDownload(canvas, name) {
+    canvas.toBlob(blob => {
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
+      const a = Object.assign(document.createElement('a'), { href: url, download: name });
+      document.body.appendChild(a); a.click(); a.remove();
       URL.revokeObjectURL(url);
-    }
+    }, 'image/png');
+  }
 
-    setStageSize(900, 560);
-    renderMaterial();
-    renderBadges();
-  </script>
+  /* == Modal confirm ================================= */
+  function showConfirm({ title, body, confirmLabel = 'Confirm', cancelLabel = 'Cancel', variant = 'danger' }) {
+    return new Promise(resolve => {
+      const iconSvg = variant === 'danger'
+        ? `<svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+             <path d="M9 3L16 15H2L9 3Z"/><line x1="9" y1="8" x2="9" y2="11"/><circle cx="9" cy="13.5" r="0.5" fill="currentColor" stroke="none"/>
+           </svg>`
+        : `<svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+             <circle cx="9" cy="9" r="7"/><line x1="9" y1="7" x2="9" y2="10"/><circle cx="9" cy="12" r="0.5" fill="currentColor" stroke="none"/>
+           </svg>`;
+
+      const backdrop = document.createElement('div');
+      backdrop.className = 'modal-backdrop';
+      backdrop.setAttribute('role', 'dialog');
+      backdrop.setAttribute('aria-modal', 'true');
+      backdrop.setAttribute('aria-labelledby', 'modal-title');
+      const confirmCls = variant === 'danger' ? 'btn btn-danger-solid' : 'btn btn-primary';
+      backdrop.innerHTML = `
+        <div class="modal">
+          <div class="modal-header">
+            <div class="modal-icon ${variant}">${iconSvg}</div>
+            <div class="modal-title" id="modal-title">${esc(title)}</div>
+          </div>
+          <div class="modal-body">${esc(body)}</div>
+          <div class="modal-actions">
+            <button class="btn" id="modalCancel" type="button">${esc(cancelLabel)}</button>
+            <button class="${confirmCls}" id="modalConfirm" type="button">${esc(confirmLabel)}</button>
+          </div>
+        </div>`;
+
+      document.body.appendChild(backdrop);
+      requestAnimationFrame(() => requestAnimationFrame(() => backdrop.classList.add('show')));
+
+      function close(result) {
+        backdrop.classList.remove('show');
+        backdrop.addEventListener('transitionend', () => { backdrop.remove(); resolve(result); }, { once: true });
+      }
+
+      backdrop.querySelector('#modalConfirm').addEventListener('click', () => close(true));
+      backdrop.querySelector('#modalCancel').addEventListener('click',  () => close(false));
+      backdrop.addEventListener('keydown', e => {
+        if (e.key === 'Escape') close(false);
+        if (e.key === 'Enter')  close(true);
+      });
+      backdrop.querySelector('#modalConfirm').focus();
+    });
+  }
+
+  function downloadText(name, text, mime) {
+    const url = URL.createObjectURL(new Blob([text], { type: mime }));
+    const a = Object.assign(document.createElement('a'), { href: url, download: name });
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  /* == Init ========================================== */
+  setStageSize(900, 560);
+  renderMaterial();
+  renderBadges();
+</script>
 </body>
 </html>
