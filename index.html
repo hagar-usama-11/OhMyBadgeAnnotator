@@ -23,7 +23,8 @@
   <meta name="twitter:description" content="Browser-based tool to annotate UI screenshots and HTML mockups with NEW / UPDATED / FIXED badge frames." />
 
   <!-- Favicon (inline SVG — no asset file needed) -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏷️</text></svg>" />
+  <!-- Favicon: same badge mark as the navbar (.hdr-icon), accent orange stroke -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18' fill='none' stroke='%23f5821f' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'><rect x='2' y='2' width='14' height='14' rx='2.5'/><rect x='5' y='5' width='4' height='4' rx='1'/><line x1='12' y1='6.5' x2='15' y2='6.5'/><line x1='12' y1='9' x2='14' y2='9'/><line x1='5' y1='12' x2='13' y2='12'/></svg>" />
   <style>
     /* == Tokens ======================================== */
     :root {
@@ -1250,7 +1251,7 @@
     addModeBtn.textContent = on ? 'Exit Draw Mode' : 'Draw Frame';
     statusDot.classList.toggle('is-draw', on);
     setStatus(on
-      ? 'Draw mode on - drag on the canvas to create a badge frame. Press Esc to exit.'
+      ? 'Draw mode on — drag on the canvas to create a badge frame. Press Esc to exit.'
       : 'Draw mode off. Click a badge to select it.');
   }
 
